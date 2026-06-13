@@ -18,6 +18,22 @@ from concurrent.futures import ThreadPoolExecutor
 import asyncio
 import threading
 
+def sanitize_input(text: str) -> str:
+    """Public function to sanitize user input to prevent prompt injection"""
+    dangerous_patterns = [
+        r'ignore\s+(previous|above|all)\s+(instructions?|commands?|prompts?)',
+        r'(return|output|give)\s+(\{.*\}|\[.*\]|json)',
+        r'system\s*:',
+        r'human\s*:',
+        r'assistant\s*:',
+    ]
+    
+    sanitized = text
+    for pattern in dangerous_patterns:
+        sanitized = re.sub(pattern, '[FILTERED]', sanitized, flags=re.IGNORECASE)
+    
+    return sanitized
+
 class GeminiService:
     def __init__(self):
         api_key = os.getenv("GEMINI_API_KEY")
